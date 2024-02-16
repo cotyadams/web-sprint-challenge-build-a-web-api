@@ -45,12 +45,16 @@ actionsRouter.put("/:id", async (req, res) => {
     const projectExists = !!await project.get(req.body.project_id);
     if (projectExists) { 
         const actionExists =!!await actions.get(id);
-        if (actionExists && req.body) {
+        if (actionExists &&
+            req.body.notes &&
+            req.body.description &&
+            req.body.project_id &&
+            (req.body.completed === true || req.body.completed === false)) {
             const updatedAction = await actions.update(id, req.body);
             res.status(200).json(updatedAction);
         } else if (!actionExists) {
             res.status(404).send('Action not found');
-        } else if (!req.body) {
+        } else {
             res.status(400).send('Please provide the correct required fields');
         }
     } else res.status(400).send('invalid project id');

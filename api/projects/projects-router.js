@@ -22,9 +22,9 @@ projectsRouter.get("/:id", async (req, res) => {
 })
 
 projectsRouter.post("/", async (req, res) => {
-    const { name, description } = req.body;
+    const { name, description, completed } = req.body;
     if (name && description) { 
-       const project = await Projects.insert({ name, description })
+       const project = await Projects.insert({ name, description, completed });
                 
         res.status(201).json(project);
 

@@ -13,7 +13,7 @@ projectsRouter.get("/", async (req, res) => {
     } else res.status(404).json([]);
 })
 
-projectsRouter.get("/:id", checkId, async (req, res) => { 
+projectsRouter.get("/:id", async (req, res) => { 
     const { id } = req.params;
     const project = await Projects.get(id);
     if (project) { 
@@ -24,38 +24,37 @@ projectsRouter.get("/:id", checkId, async (req, res) => {
 projectsRouter.post("/", async (req, res) => {
     const { name, description } = req.body;
     if (name && description) { 
-        Projects.insert({ name, description })
-            .then(project => { 
-                res.status(201).json(project);
-            })
+       const project = await Projects.insert({ name, description })
+                
+        res.status(201).json(project);
+
     } else res.status(400).json({message: "Please provide the correct required fields"});
 })
  
 projectsRouter.put("/:id", async (req, res) => { 
     const { id } = req.params;
-    const { name, description } = req.body;
-    if (name || description) {
-        Projects.update(id, {
-            name: name? name: '',
-            description: description ? description: ''
-        }).then((project) => {
-            if (project) {
-                res.status(200).json(project);
-            } else res.status(404).json({message: "Project not found"});
+    const { name, description, completed} = req.body;
+    if (name && description && (completed === true || completed === false)) {
+       const project = await Projects.update(id, {
+            name, description, completed
         })
-     }
+        if (project) {
+            res.status(200).json(project);
+        } else res.status(404).json({message: "Project not found"});
+    } else res.status(400).json({message: "Please provide the correct required fields"});
 })
 
 projectsRouter.delete("/:id", async (req, res) => {
     const { id } = req.params;
-    if (id) { 
+    const project = await Projects.get(id);
+    if (project) { 
         Projects.remove(id)
             .then(() => {
                 res.status(204).json({message: "Project deleted"});
             }).catch(() => {
                 res.status(500).json({message: "issue deleting project"});
             })
-    }
+    }else res.status(404).json({message: "Project not found"});
     
 })
  
@@ -64,7 +63,7 @@ projectsRouter.get("/:id/actions", checkId, async (req, res) => {
     const actions = await Projects.getProjectActions(id);
     if (actions.length > 0) {
         res.status(200).json(actions);
-    } else res.status(404).json({message: "No actions found for this project"});
+    } else res.status(404).json([]);
 })
 
 module.exports = projectsRouter;
